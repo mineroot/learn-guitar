@@ -18,6 +18,16 @@ export function findClosestString(frequency) {
   }, guitarStrings[0]);
 }
 
+export function getSignalLevel(buffer) {
+  let sum = 0;
+
+  for (let index = 0; index < buffer.length; index += 1) {
+    sum += buffer[index] * buffer[index];
+  }
+
+  return Math.sqrt(sum / buffer.length);
+}
+
 function distanceToClosestString(frequency) {
   return guitarStrings.reduce((closest, string) => {
     const distance = Math.abs(1200 * Math.log2(frequency / string.hz));
@@ -35,6 +45,58 @@ export function correctGuitarHarmonic(frequency) {
     const bestDistance = distanceToClosestString(best);
     return distance + 12 < bestDistance ? candidate : best;
   }, frequency);
+}
+
+function dbToLinear(db) {
+  if (!Number.isFinite(db)) return 0;
+  return 10 ** (db / 20);
+}
+
+function interpolateSpectrum(spectrum, index) {
+  const lower = Math.floor(index);
+  const upper = Math.min(spectrum.length - 1, lower + 1);
+  const ratio = index - lower;
+  const lowerValue = dbToLinear(spectrum[lower]);
+  const upperValue = dbToLinear(spectrum[upper]);
+
+  return lowerValue + (upperValue - lowerValue) * ratio;
+}
+
+function scoreFrequency(spectrum, sampleRate, fftSize, frequency) {
+  const binHz = sampleRate / fftSize;
+  let score = 0;
+
+  for (let harmonic = 1; harmonic <= 6; harmonic += 1) {
+    const harmonicFrequency = frequency * harmonic;
+    if (harmonicFrequency >= sampleRate / 2) break;
+
+    const bin = harmonicFrequency / binHz;
+    score += interpolateSpectrum(spectrum, bin) / harmonic;
+  }
+
+  return score;
+}
+
+export function detectStandardGuitarPitch(spectrum, sampleRate, fftSize) {
+  let best = null;
+  let secondBestScore = 0;
+
+  guitarStrings.forEach((string) => {
+    for (let cents = -80; cents <= 80; cents += 4) {
+      const frequency = string.hz * 2 ** (cents / 1200);
+      const score = scoreFrequency(spectrum, sampleRate, fftSize, frequency);
+
+      if (!best || score > best.score) {
+        secondBestScore = best?.score ?? 0;
+        best = { frequency, score, string };
+      } else if (score > secondBestScore) {
+        secondBestScore = score;
+      }
+    }
+  });
+
+  if (!best || best.score < 0.015 || best.score < secondBestScore * 1.08) return null;
+  return best.frequency;
 }
 
 export function detectPitch(buffer, sampleRate) {
