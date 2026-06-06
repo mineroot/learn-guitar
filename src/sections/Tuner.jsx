@@ -1,15 +1,38 @@
 import { useEffect, useRef, useState } from "react";
+import { PitchDetector } from "pitchy";
 import { guitarStrings } from "../data/music";
 import { getAudioContext } from "../utils/audio";
 import { clamp } from "../utils/math";
-import { autoCorrelate, findClosestString, frequencyToNote } from "../utils/pitch";
+import { correctGuitarHarmonic, findClosestString, frequencyToNote } from "../utils/pitch";
+
+const tunerFftSize = 8192;
+const detectionIntervalMs = 80;
+const minClarity = 0.55;
+
+async function getMicrophoneStream() {
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        channelCount: { ideal: 1 },
+      },
+    });
+  } catch (error) {
+    return navigator.mediaDevices.getUserMedia({ audio: true });
+  }
+}
 
 function Tuner() {
   const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState("Microphone off");
   const [pitch, setPitch] = useState(null);
+  const [clarity, setClarity] = useState(0);
   const audioRef = useRef(null);
   const animationRef = useRef(null);
+  const lastDetectionRef = useRef(0);
+  const recentPitchesRef = useRef([]);
 
   const detected = pitch ? frequencyToNote(pitch) : null;
   const closestString = pitch ? findClosestString(pitch) : null;
@@ -22,29 +45,43 @@ function Tuner() {
 
     async function startTuner() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-          },
-        });
+        const stream = await getMicrophoneStream();
         if (!mounted) return;
 
         const context = getAudioContext();
+        if (context.state === "suspended") await context.resume();
         const analyser = context.createAnalyser();
         const source = context.createMediaStreamSource(stream);
-        const buffer = new Float32Array(analyser.fftSize);
 
-        analyser.fftSize = 2048;
+        analyser.fftSize = tunerFftSize;
+        analyser.smoothingTimeConstant = 0;
+        const buffer = new Float32Array(analyser.fftSize);
+        const detector = PitchDetector.forFloat32Array(buffer.length);
+        detector.clarityThreshold = 0.8;
+        detector.minVolumeAbsolute = 0.002;
         source.connect(analyser);
         audioRef.current = { context, stream, analyser, buffer };
         setStatus("Listening");
 
-        const detect = () => {
-          analyser.getFloatTimeDomainData(buffer);
-          const frequency = autoCorrelate(buffer, context.sampleRate);
-          setPitch(frequency && frequency > 55 && frequency < 1000 ? frequency : null);
+        const detect = (time = 0) => {
+          if (time - lastDetectionRef.current >= detectionIntervalMs) {
+            analyser.getFloatTimeDomainData(buffer);
+            const [frequency, detectedClarity] = detector.findPitch(buffer, context.sampleRate);
+            const corrected = detectedClarity >= minClarity ? correctGuitarHarmonic(frequency) : null;
+
+            if (corrected) {
+              recentPitchesRef.current = [...recentPitchesRef.current.slice(-4), corrected];
+              const sorted = [...recentPitchesRef.current].sort((a, b) => a - b);
+              setPitch(sorted[Math.floor(sorted.length / 2)]);
+            } else {
+              recentPitchesRef.current = [];
+              setPitch(null);
+            }
+
+            setClarity(detectedClarity);
+            lastDetectionRef.current = time;
+          }
+
           animationRef.current = requestAnimationFrame(detect);
         };
 
@@ -65,6 +102,8 @@ function Tuner() {
         audioRef.current.context.close();
         audioRef.current = null;
       }
+      recentPitchesRef.current = [];
+      setClarity(0);
     };
   }, [isListening]);
 
@@ -73,7 +112,7 @@ function Tuner() {
       <div className="workspace tuner-workspace">
         <div className="tuner-note">
           <span>{detected ? `${detected.name}${detected.octave}` : "--"}</span>
-          <small>{pitch ? `${pitch.toFixed(1)} Hz` : status}</small>
+          <small>{pitch ? `${pitch.toFixed(1)} Hz · ${Math.round(clarity * 100)}%` : status}</small>
         </div>
         <div className="meter" aria-label="Tuning meter">
           <span>-50</span>

@@ -18,51 +18,103 @@ export function findClosestString(frequency) {
   }, guitarStrings[0]);
 }
 
-export function autoCorrelate(buffer, sampleRate) {
+function distanceToClosestString(frequency) {
+  return guitarStrings.reduce((closest, string) => {
+    const distance = Math.abs(1200 * Math.log2(frequency / string.hz));
+    return Math.min(closest, distance);
+  }, Number.POSITIVE_INFINITY);
+}
+
+export function correctGuitarHarmonic(frequency) {
+  if (!frequency) return null;
+
+  const candidates = [frequency, frequency / 2, frequency / 3].filter((candidate) => candidate >= 60);
+
+  return candidates.reduce((best, candidate) => {
+    const distance = distanceToClosestString(candidate);
+    const bestDistance = distanceToClosestString(best);
+    return distance + 12 < bestDistance ? candidate : best;
+  }, frequency);
+}
+
+export function detectPitch(buffer, sampleRate) {
   let rms = 0;
-  for (let i = 0; i < buffer.length; i += 1) rms += buffer[i] * buffer[i];
+  let mean = 0;
+
+  for (let i = 0; i < buffer.length; i += 1) mean += buffer[i];
+  mean /= buffer.length;
+
+  for (let i = 0; i < buffer.length; i += 1) {
+    const centered = buffer[i] - mean;
+    rms += centered * centered;
+  }
+
   rms = Math.sqrt(rms / buffer.length);
-  if (rms < 0.01) return null;
+  if (rms < 0.004) return null;
 
-  let start = 0;
-  let end = buffer.length - 1;
-  const threshold = 0.2;
+  const minFrequency = 60;
+  const maxFrequency = 1000;
+  const threshold = 0.14;
+  const minTau = Math.floor(sampleRate / maxFrequency);
+  const maxTau = Math.min(Math.floor(sampleRate / minFrequency), Math.floor(buffer.length / 2));
+  const difference = new Float32Array(maxTau + 1);
 
-  for (let i = 0; i < buffer.length / 2; i += 1) {
-    if (Math.abs(buffer[i]) < threshold) {
-      start = i;
+  for (let tau = minTau; tau <= maxTau; tau += 1) {
+    let sum = 0;
+
+    for (let index = 0; index < maxTau; index += 1) {
+      const delta = buffer[index] - mean - (buffer[index + tau] - mean);
+      sum += delta * delta;
+    }
+
+    difference[tau] = sum;
+  }
+
+  let runningSum = 0;
+  let bestTau = -1;
+
+  for (let tau = minTau; tau <= maxTau; tau += 1) {
+    runningSum += difference[tau];
+    if (runningSum === 0) continue;
+
+    const normalized = (difference[tau] * tau) / runningSum;
+
+    if (normalized < threshold) {
+      bestTau = tau;
+
+      while (bestTau + 1 <= maxTau) {
+        const nextNormalized = (difference[bestTau + 1] * (bestTau + 1)) / runningSum;
+        if (difference[bestTau + 1] >= difference[bestTau] || nextNormalized > threshold) break;
+        bestTau += 1;
+      }
+
       break;
     }
   }
 
-  for (let i = 1; i < buffer.length / 2; i += 1) {
-    if (Math.abs(buffer[buffer.length - i]) < threshold) {
-      end = buffer.length - i;
-      break;
+  if (bestTau === -1) {
+    let bestDifference = Number.POSITIVE_INFINITY;
+
+    for (let tau = minTau; tau <= maxTau; tau += 1) {
+      if (difference[tau] < bestDifference) {
+        bestDifference = difference[tau];
+        bestTau = tau;
+      }
     }
   }
 
-  const slice = buffer.slice(start, end);
-  const correlations = new Array(slice.length).fill(0);
+  if (bestTau <= 0) return null;
 
-  for (let lag = 0; lag < slice.length; lag += 1) {
-    for (let i = 0; i < slice.length - lag; i += 1) {
-      correlations[lag] += slice[i] * slice[i + lag];
-    }
-  }
+  const previous = difference[bestTau - 1] ?? difference[bestTau];
+  const current = difference[bestTau];
+  const next = difference[bestTau + 1] ?? difference[bestTau];
+  const denominator = previous + next - 2 * current;
+  const betterTau = denominator === 0 ? bestTau : bestTau + (previous - next) / (2 * denominator);
+  const frequency = sampleRate / betterTau;
 
-  let lag = 0;
-  while (correlations[lag] > correlations[lag + 1]) lag += 1;
+  return frequency >= minFrequency && frequency <= maxFrequency ? frequency : null;
+}
 
-  let maxLag = lag;
-  let maxCorrelation = -1;
-  for (; lag < correlations.length; lag += 1) {
-    if (correlations[lag] > maxCorrelation) {
-      maxCorrelation = correlations[lag];
-      maxLag = lag;
-    }
-  }
-
-  if (maxLag === 0) return null;
-  return sampleRate / maxLag;
+export function autoCorrelate(buffer, sampleRate) {
+  return detectPitch(buffer, sampleRate);
 }
