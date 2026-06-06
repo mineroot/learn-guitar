@@ -2,6 +2,8 @@
 
 A small React app for guitar practice, built with Vite and hosted on GitHub Pages.
 
+Live: https://mineroot.github.io/learn-guitar
+
 ## Features
 
 - Metronome with tempo, beats, subdivisions, and Space key toggle

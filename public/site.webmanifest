@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "Learn Guitar",
+  "short_name": "Learn Guitar",
+  "description": "Guitar practice tools: metronome, tuner, fretboard, and rhythm generator.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#f5f1e8",
+  "background_color": "#f5f1e8",
+  "icons": [
+    {
+      "src": "./android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
