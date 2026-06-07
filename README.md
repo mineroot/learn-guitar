@@ -9,6 +9,7 @@ Live: https://mineroot.github.io/learn-guitar
 - Metronome with tempo, beats, subdivisions, and Space key toggle
 - Tuner using microphone pitch detection
 - Interactive 24-fret guitar fretboard for standard E tuning
+- Chord library with diagrams and chords by key
 - Rhythm generator with notation, playback, rests, repeat, and metronome overlay
 - Section URLs with hash routing for GitHub Pages
 

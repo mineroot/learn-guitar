@@ -1,5 +1,6 @@
 import AppShell from "./components/AppShell";
 import { useHashSection } from "./hooks/useHashSection";
+import ChordLibrary from "./sections/ChordLibrary";
 import Fretboard from "./sections/Fretboard";
 import Metronome from "./sections/Metronome";
 import RhythmGenerator from "./sections/RhythmGenerator";
@@ -9,6 +10,7 @@ const sectionComponents = {
   metronome: Metronome,
   tuner: Tuner,
   fretboard: Fretboard,
+  chords: ChordLibrary,
   rhythm: RhythmGenerator,
 };
 
