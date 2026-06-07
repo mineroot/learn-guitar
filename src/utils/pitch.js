@@ -28,7 +28,7 @@ export function getSignalLevel(buffer) {
   return Math.sqrt(sum / buffer.length);
 }
 
-function distanceToClosestString(frequency) {
+export function centsFromClosestString(frequency) {
   return guitarStrings.reduce((closest, string) => {
     const distance = Math.abs(1200 * Math.log2(frequency / string.hz));
     return Math.min(closest, distance);
@@ -41,8 +41,8 @@ export function correctGuitarHarmonic(frequency) {
   const candidates = [frequency, frequency / 2, frequency / 3].filter((candidate) => candidate >= 60);
 
   return candidates.reduce((best, candidate) => {
-    const distance = distanceToClosestString(candidate);
-    const bestDistance = distanceToClosestString(best);
+    const distance = centsFromClosestString(candidate);
+    const bestDistance = centsFromClosestString(best);
     return distance + 12 < bestDistance ? candidate : best;
   }, frequency);
 }

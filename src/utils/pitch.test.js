@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  centsFromClosestString,
   correctGuitarHarmonic,
   detectPitch,
   detectStandardGuitarPitch,
@@ -43,6 +44,7 @@ describe("pitch utilities", () => {
   it("finds the closest standard guitar string", () => {
     expect(findClosestString(83).name).toBe("E2");
     expect(findClosestString(248).name).toBe("B3");
+    expect(centsFromClosestString(110)).toBeCloseTo(0, 3);
   });
 
   it("folds strong octave harmonics back toward guitar strings", () => {

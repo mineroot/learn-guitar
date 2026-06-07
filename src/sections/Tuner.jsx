@@ -4,6 +4,7 @@ import { guitarStrings } from "../data/music";
 import { getAudioContext } from "../utils/audio";
 import { clamp } from "../utils/math";
 import {
+  centsFromClosestString,
   correctGuitarHarmonic,
   detectStandardGuitarPitch,
   findClosestString,
@@ -13,8 +14,10 @@ import {
 
 const tunerFftSize = 32768;
 const detectionIntervalMs = 110;
-const minClarity = 0.72;
-const minSignalLevel = 0.008;
+const inputGain = 8;
+const minClarity = 0.5;
+const minSignalLevel = 0.0015;
+const maxStringDistanceCents = 90;
 
 async function getMicrophoneStream() {
   return navigator.mediaDevices.getUserMedia({ audio: true });
@@ -49,15 +52,29 @@ function Tuner() {
         if (context.state === "suspended") await context.resume();
         const analyser = context.createAnalyser();
         const source = context.createMediaStreamSource(stream);
+        const highpass = context.createBiquadFilter();
+        const lowpass = context.createBiquadFilter();
+        const gain = context.createGain();
 
         analyser.fftSize = tunerFftSize;
         analyser.smoothingTimeConstant = 0;
+        highpass.type = "highpass";
+        highpass.frequency.value = 55;
+        lowpass.type = "lowpass";
+        lowpass.frequency.value = 1400;
+        gain.gain.value = inputGain;
+
         const timeBuffer = new Float32Array(analyser.fftSize);
         const frequencyBuffer = new Float32Array(analyser.frequencyBinCount);
         const detector = PitchDetector.forFloat32Array(timeBuffer.length);
-        detector.clarityThreshold = 0.8;
-        detector.minVolumeAbsolute = 0.001;
-        source.connect(analyser);
+        detector.clarityThreshold = 0.7;
+        detector.minVolumeAbsolute = 0.0005;
+        detector.maxInputAmplitude = inputGain;
+
+        source.connect(highpass);
+        highpass.connect(lowpass);
+        lowpass.connect(gain);
+        gain.connect(analyser);
         audioRef.current = { context, stream, analyser, timeBuffer, frequencyBuffer };
         setStatus("Listening");
 
@@ -68,9 +85,13 @@ function Tuner() {
 
             const signalLevel = getSignalLevel(timeBuffer);
             const [frequency, detectedClarity] = detector.findPitch(timeBuffer, context.sampleRate);
+            const correctedPitchyFrequency = correctGuitarHarmonic(frequency);
             const pitchyFrequency =
-              detectedClarity >= minClarity && signalLevel >= minSignalLevel
-                ? correctGuitarHarmonic(frequency)
+              detectedClarity >= minClarity &&
+              signalLevel >= minSignalLevel &&
+              correctedPitchyFrequency &&
+              centsFromClosestString(correctedPitchyFrequency) <= maxStringDistanceCents
+                ? correctedPitchyFrequency
                 : null;
             const guitarFrequency =
               signalLevel >= minSignalLevel
