@@ -1,5 +1,6 @@
 export const sections = [
   { id: "metronome", label: "Metronome" },
+  { id: "drums", label: "Drums" },
   { id: "tuner", label: "Tuner" },
   { id: "fretboard", label: "Fretboard" },
   { id: "chords", label: "Chords" },

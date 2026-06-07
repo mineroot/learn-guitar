@@ -149,7 +149,7 @@ h1 {
 }
 
 .section-tabs a {
-  flex: 1;
+  flex: 1 1 96px;
 }
 
 .section-tabs a.active,
@@ -1075,6 +1075,212 @@ select {
   accent-color: var(--accent);
 }
 
+.drums-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.drums-stage,
+.drums-controls {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 18px 42px var(--shadow);
+}
+
+.drums-stage {
+  display: grid;
+  gap: 22px;
+  min-height: 360px;
+  padding: 16px;
+}
+
+.drums-header {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.drums-header .primary-action {
+  width: 100%;
+}
+
+.drums-header h2 {
+  margin: 0;
+  color: var(--dark);
+  font-size: clamp(3rem, 12vw, 7rem);
+  line-height: 0.9;
+}
+
+.drums-header span,
+.drum-readout small,
+.drums-controls label strong {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.drum-readout {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.drum-readout span {
+  color: var(--dark);
+  font-size: clamp(4.5rem, 18vw, 10rem);
+  font-weight: 950;
+  line-height: 0.88;
+}
+
+.drum-machine {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.drum-machine-labels,
+.drum-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.drum-machine-labels span {
+  display: grid;
+  min-height: 28px;
+  align-items: center;
+  color: var(--control-text);
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.drum-step-row {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(11px, 1fr));
+  gap: 5px;
+  min-width: 0;
+}
+
+.drum-step-row i {
+  min-width: 0;
+  min-height: 28px;
+  border: 1px solid var(--string-line);
+  border-radius: 6px;
+  background: var(--soft);
+  transition:
+    background 90ms ease,
+    border-color 90ms ease,
+    transform 90ms ease;
+}
+
+.drum-step-row i:nth-child(4n + 1) {
+  border-color: var(--meter-line);
+}
+
+.drum-step-row i.active {
+  background: var(--green);
+}
+
+.drum-step-row i.playing {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 4px rgb(211 73 46 / 0.14);
+}
+
+.drum-step-row i.active.playing {
+  background: var(--accent);
+}
+
+.drums-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+}
+
+.drums-controls label {
+  display: grid;
+  gap: 9px;
+  color: var(--control-text);
+  font-weight: 850;
+}
+
+.style-picks,
+.pattern-picks {
+  display: grid;
+  gap: 8px;
+}
+
+.style-picks {
+  grid-template-columns: 1fr;
+}
+
+.pattern-picks {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.style-picks button {
+  display: grid;
+  min-height: 58px;
+  align-content: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--control-text);
+  background: var(--soft);
+  text-align: left;
+}
+
+.pattern-picks button {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--control-text);
+  background: var(--soft);
+  font-weight: 900;
+}
+
+.style-picks button.active,
+.pattern-picks button.active {
+  border-color: var(--green);
+  color: var(--on-strong);
+  background: var(--green);
+}
+
+.style-picks strong {
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.style-picks span {
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+
+.tone-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding-top: 2px;
+}
+
+.tone-controls label {
+  grid-template-columns: minmax(72px, 0.7fr) minmax(0, 1.3fr) 54px;
+  align-items: center;
+  gap: 10px;
+}
+
+.tone-controls label strong {
+  text-align: right;
+}
+
 @media (min-width: 761px) {
   .app-shell {
     gap: 24px;
@@ -1162,11 +1368,20 @@ select {
     grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
   }
 
+  .drums-section {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  }
+
   .chord-layout {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
   }
 
   .rhythm-stage {
+    min-height: 430px;
+    padding: 24px;
+  }
+
+  .drums-stage {
     min-height: 430px;
     padding: 24px;
   }
@@ -1177,7 +1392,17 @@ select {
     justify-content: space-between;
   }
 
+  .drums-header {
+    align-items: end;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
   .rhythm-header .primary-action {
+    width: auto;
+  }
+
+  .drums-header .primary-action {
     width: auto;
   }
 
