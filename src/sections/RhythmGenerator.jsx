@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { defaultRhythmDurations, rhythmDurations } from "../data/rhythm";
-import { ensureAudioContext, playPulse, unlockAudio } from "../utils/audio";
+import { createClickFallback, ensureAudioContext, playPulse, unlockAudio } from "../utils/audio";
 import { clamp } from "../utils/math";
 import { generateRhythm, getBarTicks } from "../utils/rhythm";
 import RhythmNotationBar from "./rhythm/RhythmNotationBar";
@@ -26,6 +26,7 @@ function RhythmGenerator() {
     }),
   );
   const audioContextRef = useRef(null);
+  const clickFallbackRef = useRef(null);
   const tickIntervalRef = useRef(null);
   const positionRef = useRef(0);
 
@@ -36,7 +37,10 @@ function RhythmGenerator() {
 
   const togglePlayback = async () => {
     if (!isPlaying) {
-      const context = await ensureAudioContext(audioContextRef);
+      if (!clickFallbackRef.current) clickFallbackRef.current = createClickFallback();
+      clickFallbackRef.current.unlock();
+      clickFallbackRef.current.play(true);
+      const context = ensureAudioContext(audioContextRef);
       unlockAudio(context);
     }
 
@@ -67,7 +71,10 @@ function RhythmGenerator() {
       const isBeat = tick % 12 === 0;
       const isBarStart = tick % barTicks === 0;
 
-      if (event && !event.isRest) playPulse(context, isBarStart ? 1180 : 760, isBarStart ? 0.18 : 0.13, 0.045);
+      if (event && !event.isRest) {
+        playPulse(context, isBarStart ? 1180 : 760, isBarStart ? 0.18 : 0.13, 0.045);
+        clickFallbackRef.current?.play(isBarStart);
+      }
       if (metronome && isBeat) playPulse(context, isBarStart ? 1500 : 980, isBarStart ? 0.08 : 0.045, 0.035);
 
       const nextTick = tick + 1;

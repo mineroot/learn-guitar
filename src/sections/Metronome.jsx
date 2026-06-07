@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ensureAudioContext, playPulse, unlockAudio } from "../utils/audio";
+import { createClickFallback, ensureAudioContext, playPulse, unlockAudio } from "../utils/audio";
 import { isTypingOrAdjusting } from "../utils/dom";
 import { clamp } from "../utils/math";
 
@@ -10,6 +10,7 @@ function Metronome() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
   const audioContextRef = useRef(null);
+  const clickFallbackRef = useRef(null);
   const intervalRef = useRef(null);
   const beatRef = useRef(0);
 
@@ -17,7 +18,10 @@ function Metronome() {
 
   const togglePlayback = useCallback(async () => {
     if (!isPlaying) {
-      const context = await ensureAudioContext(audioContextRef);
+      if (!clickFallbackRef.current) clickFallbackRef.current = createClickFallback();
+      clickFallbackRef.current.unlock();
+      clickFallbackRef.current.play(true);
+      const context = ensureAudioContext(audioContextRef);
       unlockAudio(context);
     }
 
@@ -33,6 +37,7 @@ function Metronome() {
       const isDownbeat = beatRef.current % (beatsPerBar * subdivision) === 0;
 
       playPulse(context, isDownbeat ? 1320 : 880, isDownbeat ? 0.18 : 0.1, 0.055);
+      clickFallbackRef.current?.play(isDownbeat);
 
       setCurrentBeat(Math.floor(beatRef.current / subdivision) % beatsPerBar);
       beatRef.current = (beatRef.current + 1) % (beatsPerBar * subdivision);
