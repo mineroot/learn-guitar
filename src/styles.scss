@@ -1,20 +1,70 @@
-$ink: #1e2224;
-$panel: #fffaf1;
-$paper: #f5f1e8;
-$line: #d9d1c2;
-$muted: #657066;
-$dark: #24312b;
-$accent: #d3492e;
-$green: #2f7d5f;
 $radius: 8px;
 
 :root {
-  color: $ink;
-  background: $paper;
+  color-scheme: light;
+  --ink: #1e2224;
+  --panel: #fffaf1;
+  --paper: #f5f1e8;
+  --line: #d9d1c2;
+  --muted: #657066;
+  --dark: #24312b;
+  --tab-text: #4e5650;
+  --control-text: #3f463f;
+  --button-text: #222824;
+  --active-bg: #24312b;
+  --active-text: #f8f4eb;
+  --on-strong: #fffaf1;
+  --accent: #d3492e;
+  --green: #2f7d5f;
+  --warning: #84522f;
+  --soft: #f7efe2;
+  --soft-2: #eadfce;
+  --soft-3: #efe5d4;
+  --ghost-bg: #f3eadb;
+  --string-active-bg: #e5f1e7;
+  --meter-line: #d8cbbb;
+  --string-line: #e0d6c5;
+  --fret-line: #d7b985;
+  --staff: #7b7164;
+  --shadow: rgb(61 44 23 / 0.1);
+  --wood-line: linear-gradient(90deg, #c7bcae, #fff6df, #b3aa9d);
+  --note-head-open: #f7efe2;
+  color: var(--ink);
+  background: var(--paper);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: #f2efe6;
+    --panel: #191d1b;
+    --paper: #101311;
+    --line: #333a35;
+    --muted: #a0ab9f;
+    --dark: #edf3e8;
+    --tab-text: #c5cec3;
+    --control-text: #d7ded4;
+    --button-text: #f1eee6;
+    --active-bg: #edf3e8;
+    --active-text: #101311;
+    --on-strong: #fffaf1;
+    --soft: #222820;
+    --soft-2: #2c342b;
+    --soft-3: #30382f;
+    --ghost-bg: #242b25;
+    --string-active-bg: #193326;
+    --meter-line: #4b554d;
+    --string-line: #333b35;
+    --fret-line: #6d5b35;
+    --staff: #b8b0a3;
+    --shadow: rgb(0 0 0 / 0.28);
+    --wood-line: linear-gradient(90deg, #70675d, #bdb2a0, #625a52);
+    --note-head-open: #f7efe2;
+  }
 }
 
 * {
@@ -25,6 +75,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: var(--paper);
 }
 
 button,
@@ -56,7 +107,7 @@ button {
 
 .eyebrow {
   margin: 0 0 6px;
-  color: $muted;
+  color: var(--muted);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -75,9 +126,9 @@ h1 {
   flex-wrap: wrap;
   gap: 6px;
   padding: 5px;
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: $radius;
-  background: $panel;
+  background: var(--panel);
 }
 
 .section-tabs a,
@@ -87,7 +138,7 @@ h1 {
   min-height: 44px;
   padding: 0 14px;
   border-radius: 6px;
-  color: #4e5650;
+  color: var(--tab-text);
   background: transparent;
   font-weight: 800;
   text-decoration: none;
@@ -103,8 +154,8 @@ h1 {
 
 .section-tabs a.active,
 .segmented button.active {
-  color: #f8f4eb;
-  background: $dark;
+  color: var(--active-text);
+  background: var(--active-bg);
 }
 
 .instrument-panel {
@@ -157,10 +208,10 @@ h1 {
 
 .workspace,
 .controls {
-  border: 1px solid $line;
+  border: 1px solid var(--line);
   border-radius: $radius;
-  background: $panel;
-  box-shadow: 0 18px 42px rgb(61 44 23 / 0.1);
+  background: var(--panel);
+  box-shadow: 0 18px 42px var(--shadow);
 }
 
 .workspace {
@@ -186,7 +237,7 @@ h1 {
 
 .tempo-readout small,
 .tuner-note small {
-  color: $muted;
+  color: var(--muted);
   font-size: 1rem;
   font-weight: 850;
 }
@@ -202,11 +253,11 @@ h1 {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #d8cbbb;
+  background: var(--meter-line);
 }
 
 .beat-row i.lit {
-  background: $accent;
+  background: var(--accent);
   box-shadow: 0 0 0 8px rgb(211 73 46 / 0.14);
 }
 
@@ -215,8 +266,8 @@ h1 {
   min-height: 52px;
   padding: 0 24px;
   border-radius: $radius;
-  color: $panel;
-  background: $accent;
+  color: var(--on-strong);
+  background: var(--accent);
   font-size: 1.03rem;
   font-weight: 900;
 }
@@ -231,22 +282,22 @@ h1 {
 .controls label {
   display: grid;
   gap: 12px;
-  color: #3f463f;
+  color: var(--control-text);
   font-weight: 850;
 }
 
 input[type="range"] {
   width: 100%;
-  accent-color: $accent;
+  accent-color: var(--accent);
 }
 
 select {
   min-height: 44px;
   padding: 0 38px 0 12px;
-  border: 1px solid $line;
+  border: 1px solid var(--line);
   border-radius: $radius;
-  color: #222824;
-  background: $panel;
+  color: var(--button-text);
+  background: var(--panel);
   font-weight: 850;
 }
 
@@ -255,7 +306,7 @@ select {
   grid-template-columns: 1fr 42px 54px 42px;
   align-items: center;
   gap: 8px;
-  color: #3f463f;
+  color: var(--control-text);
   font-weight: 850;
 }
 
@@ -263,8 +314,8 @@ select {
   width: 42px;
   height: 42px;
   border-radius: 8px;
-  background: #eadfce;
-  color: #222824;
+  background: var(--soft-2);
+  color: var(--button-text);
   font-size: 1.2rem;
   font-weight: 900;
 }
@@ -287,7 +338,7 @@ select {
   grid-template-columns: 34px minmax(160px, 1fr) 34px;
   align-items: center;
   gap: 8px;
-  color: #657066;
+  color: var(--muted);
   font-weight: 850;
 }
 
@@ -298,7 +349,7 @@ select {
 .meter-track {
   position: relative;
   height: 86px;
-  border-bottom: 4px solid #d8cbbb;
+  border-bottom: 4px solid var(--meter-line);
 }
 
 .meter-track::before {
@@ -307,7 +358,7 @@ select {
   bottom: -4px;
   left: 0;
   height: 4px;
-  background: linear-gradient(90deg, #d3492e, #e7c35e, #2f7d5f, #e7c35e, #d3492e);
+  background: linear-gradient(90deg, var(--accent), #e7c35e, var(--green), #e7c35e, var(--accent));
   content: "";
 }
 
@@ -318,7 +369,7 @@ select {
   width: 4px;
   height: 30px;
   border-radius: 99px;
-  background: #24312b;
+  background: var(--active-bg);
 }
 
 .meter-track i {
@@ -328,7 +379,7 @@ select {
   width: 4px;
   height: 76px;
   border-radius: 99px;
-  background: #d3492e;
+  background: var(--accent);
   transform-origin: bottom center;
   transition: transform 120ms ease;
 }
@@ -336,13 +387,13 @@ select {
 .tuning-state {
   min-height: 29px;
   margin: 0;
-  color: #84522f;
+  color: var(--warning);
   font-size: 1.3rem;
   font-weight: 900;
 }
 
 .tuning-state.good {
-  color: #2f7d5f;
+  color: var(--green);
 }
 
 .string-list {
@@ -355,9 +406,9 @@ select {
   align-items: center;
   min-height: 54px;
   padding: 0 14px;
-  border: 1px solid #e0d6c5;
+  border: 1px solid var(--string-line);
   border-radius: 8px;
-  background: #f7efe2;
+  background: var(--soft);
 }
 
 .string span {
@@ -366,13 +417,13 @@ select {
 }
 
 .string strong {
-  color: #657066;
+  color: var(--muted);
   text-align: right;
 }
 
 .string.active {
-  border-color: #2f7d5f;
-  background: #e5f1e7;
+  border-color: var(--green);
+  background: var(--string-active-bg);
 }
 
 .fretboard-section {
@@ -387,10 +438,10 @@ select {
   align-items: stretch;
   gap: 12px;
   padding: 16px;
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fffaf1;
-  box-shadow: 0 18px 42px rgb(61 44 23 / 0.1);
+  background: var(--panel);
+  box-shadow: 0 18px 42px var(--shadow);
 }
 
 .fretboard-controls label {
@@ -398,17 +449,17 @@ select {
   gap: 8px;
   min-width: 156px;
   flex: 1 1 150px;
-  color: #3f463f;
+  color: var(--control-text);
   font-weight: 850;
 }
 
 .ghost-action {
   min-height: 44px;
   padding: 0 14px;
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  color: #24312b;
-  background: #f3eadb;
+  color: var(--dark);
+  background: var(--ghost-bg);
   font-weight: 900;
 }
 
@@ -419,10 +470,10 @@ select {
 .fretboard-wrap {
   min-width: 0;
   overflow-x: auto;
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fffaf1;
-  box-shadow: 0 18px 42px rgb(61 44 23 / 0.1);
+  background: var(--panel);
+  box-shadow: 0 18px 42px var(--shadow);
 }
 
 .fret-numbers,
@@ -436,8 +487,8 @@ select {
   position: sticky;
   top: 0;
   z-index: 3;
-  color: #657066;
-  background: #f7efe2;
+  color: var(--muted);
+  background: var(--soft);
   font-size: 0.76rem;
   font-weight: 900;
 }
@@ -446,13 +497,13 @@ select {
   display: grid;
   min-height: 34px;
   place-items: center;
-  border-right: 1px solid #e0d6c5;
-  border-bottom: 1px solid #e0d6c5;
+  border-right: 1px solid var(--string-line);
+  border-bottom: 1px solid var(--string-line);
 }
 
 .fret-numbers .marker {
-  color: #24312b;
-  background: #eadfce;
+  color: var(--dark);
+  background: var(--soft-2);
 }
 
 .fretboard-grid {
@@ -472,7 +523,7 @@ select {
   z-index: 0;
   height: 4px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #c7bcae, #fff6df, #b3aa9d);
+  background: var(--wood-line);
   box-shadow: 0 2px 6px rgb(61 44 23 / 0.28);
   content: "";
 }
@@ -486,8 +537,8 @@ select {
   min-height: 64px;
   padding: 0 12px;
   border-right: 4px solid #e4c07c;
-  border-bottom: 1px solid #e0d6c5;
-  background: #f7efe2;
+  border-bottom: 1px solid var(--string-line);
+  background: var(--soft);
 }
 
 .string-label strong {
@@ -502,8 +553,8 @@ select {
   min-width: 44px;
   min-height: 64px;
   place-items: center;
-  border-right: 2px solid #d7b985;
-  border-bottom: 1px solid #e0d6c5;
+  border-right: 2px solid var(--fret-line);
+  border-bottom: 1px solid var(--string-line);
   color: #746b5e;
   background: transparent;
 }
@@ -515,21 +566,21 @@ select {
   height: 34px;
   place-items: center;
   border-radius: 50%;
-  background: #efe5d4;
+  background: var(--soft-3);
   font-size: 0.9rem;
   font-weight: 950;
 }
 
 .fret-cell.in-pattern span,
 .fretboard-summary button {
-  color: #fffaf1;
-  background: #2f7d5f;
+  color: var(--on-strong);
+  background: var(--green);
 }
 
 .fret-cell.root-note span,
 .fretboard-summary button.root-note {
-  color: #fffaf1;
-  background: #d3492e;
+  color: var(--on-strong);
+  background: var(--accent);
   box-shadow: 0 0 0 5px rgb(211 73 46 / 0.15);
 }
 
@@ -554,15 +605,15 @@ select {
   justify-content: space-between;
   gap: 14px;
   padding: 16px;
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fffaf1;
-  box-shadow: 0 18px 42px rgb(61 44 23 / 0.1);
+  background: var(--panel);
+  box-shadow: 0 18px 42px var(--shadow);
 }
 
 .fretboard-summary p {
   margin: 0;
-  color: #24312b;
+  color: var(--dark);
   font-size: 1.1rem;
   font-weight: 950;
 }
@@ -586,10 +637,10 @@ select {
 
 .rhythm-stage,
 .rhythm-controls {
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fffaf1;
-  box-shadow: 0 18px 42px rgb(61 44 23 / 0.1);
+  background: var(--panel);
+  box-shadow: 0 18px 42px var(--shadow);
 }
 
 .rhythm-stage {
@@ -612,7 +663,7 @@ select {
 
 .rhythm-header h2 {
   margin: 0;
-  color: #24312b;
+  color: var(--dark);
   font-size: clamp(3rem, 10vw, 7rem);
   line-height: 0.9;
 }
@@ -633,10 +684,10 @@ select {
   display: grid;
   min-height: 70px;
   place-items: center;
-  border: 1px solid #e0d6c5;
+  border: 1px solid var(--string-line);
   border-radius: 8px;
-  color: #657066;
-  background: #f7efe2;
+  color: var(--muted);
+  background: var(--soft);
   font-weight: 950;
 }
 
@@ -644,15 +695,15 @@ select {
   display: block;
   width: 100%;
   min-height: 112px;
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f7efe2;
+  background: var(--soft);
 }
 
 .staff-line,
 .bar-line,
 .beat-line {
-  stroke: #7b7164;
+  stroke: var(--staff);
   stroke-width: 1.6;
 }
 
@@ -666,7 +717,7 @@ select {
 }
 
 .time-signature {
-  fill: #24312b;
+  fill: var(--dark);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 24px;
   font-weight: 900;
@@ -674,7 +725,7 @@ select {
 }
 
 .notation-event {
-  color: #24312b;
+  color: var(--dark);
   fill: currentColor;
   stroke: currentColor;
   transition:
@@ -683,7 +734,7 @@ select {
 }
 
 .notation-event.active {
-  color: #d3492e;
+  color: var(--accent);
   transform: translateY(-2px);
 }
 
@@ -698,7 +749,7 @@ select {
 }
 
 .note-head.open {
-  fill: #f7efe2;
+  fill: var(--soft);
 }
 
 .note-stem {
@@ -715,7 +766,7 @@ select {
 }
 
 .beam-group line {
-  stroke: #24312b;
+  stroke: var(--dark);
   stroke-linecap: round;
   stroke-width: 6;
 }
@@ -738,12 +789,12 @@ select {
 .rhythm-controls label {
   display: grid;
   gap: 9px;
-  color: #3f463f;
+  color: var(--control-text);
   font-weight: 850;
 }
 
 .rhythm-controls label strong {
-  color: #657066;
+  color: var(--muted);
   font-size: 0.88rem;
 }
 
@@ -765,17 +816,17 @@ select {
   align-content: center;
   gap: 2px;
   padding: 8px 10px;
-  border: 1px solid #d9d1c2;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  color: #3f463f;
-  background: #f7efe2;
+  color: var(--control-text);
+  background: var(--soft);
   text-align: left;
 }
 
 .duration-picks button.active {
-  border-color: #2f7d5f;
-  color: #fffaf1;
-  background: #2f7d5f;
+  border-color: var(--green);
+  color: var(--on-strong);
+  background: var(--green);
 }
 
 .duration-picks strong {
@@ -796,7 +847,7 @@ select {
 .toggle-line input {
   width: 18px;
   height: 18px;
-  accent-color: #d3492e;
+  accent-color: var(--accent);
 }
 
 @media (min-width: 761px) {

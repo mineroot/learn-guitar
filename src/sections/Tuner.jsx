@@ -28,7 +28,6 @@ function Tuner() {
   const [status, setStatus] = useState("Microphone off");
   const [pitch, setPitch] = useState(null);
   const [clarity, setClarity] = useState(0);
-  const [level, setLevel] = useState(0);
   const audioRef = useRef(null);
   const animationRef = useRef(null);
   const lastDetectionRef = useRef(0);
@@ -109,7 +108,6 @@ function Tuner() {
             }
 
             setClarity(detectedClarity);
-            setLevel(signalLevel);
             lastDetectionRef.current = time;
           }
 
@@ -135,7 +133,6 @@ function Tuner() {
       }
       recentPitchesRef.current = [];
       setClarity(0);
-      setLevel(0);
     };
   }, [isListening]);
 
@@ -146,9 +143,9 @@ function Tuner() {
           <span>{detected ? `${detected.name}${detected.octave}` : "--"}</span>
           <small>
             {pitch
-              ? `${pitch.toFixed(1)} Hz · ${Math.round(clarity * 100)}% · input ${Math.round(level * 1000)}`
+              ? `${pitch.toFixed(1)} Hz · ${Math.round(clarity * 100)}%`
               : isListening
-                ? `${status} · input ${Math.round(level * 1000)}`
+                ? status
                 : status}
           </small>
         </div>
