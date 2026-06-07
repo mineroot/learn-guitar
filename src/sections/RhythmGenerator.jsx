@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { defaultRhythmDurations, rhythmDurations } from "../data/rhythm";
-import { getAudioContext, playPulse } from "../utils/audio";
+import { ensureAudioContext, playPulse, unlockAudio } from "../utils/audio";
 import { clamp } from "../utils/math";
 import { generateRhythm, getBarTicks } from "../utils/rhythm";
 import RhythmNotationBar from "./rhythm/RhythmNotationBar";
@@ -34,6 +34,15 @@ function RhythmGenerator() {
   const flatEvents = useMemo(() => pattern.flat(), [pattern]);
   const tickMs = useMemo(() => (60 / bpm / 12) * 1000, [bpm]);
 
+  const togglePlayback = async () => {
+    if (!isPlaying) {
+      const context = await ensureAudioContext(audioContextRef);
+      unlockAudio(context);
+    }
+
+    setIsPlaying((playing) => !playing);
+  };
+
   const regenerate = useCallback(() => {
     const safeAllowedIds = allowedIds.length ? allowedIds : ["quarter"];
     setPattern(generateRhythm({ allowedIds: safeAllowedIds, bars, timeTop, timeBottom, restChance }));
@@ -49,8 +58,8 @@ function RhythmGenerator() {
   useEffect(() => {
     if (!isPlaying) return undefined;
 
-    if (!audioContextRef.current) audioContextRef.current = getAudioContext();
     const context = audioContextRef.current;
+    if (!context) return undefined;
 
     tickIntervalRef.current = window.setInterval(() => {
       const tick = positionRef.current;
@@ -103,7 +112,7 @@ function RhythmGenerator() {
           </div>
           <button
             className="primary-action"
-            onClick={() => setIsPlaying((playing) => !playing)}
+            onClick={togglePlayback}
             type="button"
           >
             {isPlaying ? "Stop" : "Play"}

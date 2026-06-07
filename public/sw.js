@@ -1,4 +1,4 @@
-const cacheName = "learn-guitar-v3";
+const cacheName = "learn-guitar-v4";
 const appShell = [
   "./",
   "./index.html",

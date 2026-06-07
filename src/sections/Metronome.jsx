@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { getAudioContext, playPulse } from "../utils/audio";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ensureAudioContext, playPulse, unlockAudio } from "../utils/audio";
 import { isTypingOrAdjusting } from "../utils/dom";
 import { clamp } from "../utils/math";
 
@@ -15,12 +15,21 @@ function Metronome() {
 
   const intervalMs = useMemo(() => 60000 / bpm / subdivision, [bpm, subdivision]);
 
+  const togglePlayback = useCallback(async () => {
+    if (!isPlaying) {
+      const context = await ensureAudioContext(audioContextRef);
+      unlockAudio(context);
+    }
+
+    setIsPlaying((playing) => !playing);
+  }, [isPlaying]);
+
   useEffect(() => {
     if (!isPlaying) return undefined;
 
     const playClick = () => {
-      if (!audioContextRef.current) audioContextRef.current = getAudioContext();
       const context = audioContextRef.current;
+      if (!context) return;
       const isDownbeat = beatRef.current % (beatsPerBar * subdivision) === 0;
 
       playPulse(context, isDownbeat ? 1320 : 880, isDownbeat ? 0.18 : 0.1, 0.055);
@@ -44,12 +53,12 @@ function Metronome() {
       if (event.code !== "Space" || event.repeat || isTypingOrAdjusting(event.target)) return;
 
       event.preventDefault();
-      setIsPlaying((playing) => !playing);
+      togglePlayback();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [togglePlayback]);
 
   return (
     <section className="tool-grid" aria-label="Metronome">
@@ -65,7 +74,7 @@ function Metronome() {
         </div>
         <button
           className="primary-action"
-          onClick={() => setIsPlaying((playing) => !playing)}
+          onClick={togglePlayback}
           type="button"
         >
           {isPlaying ? "Stop" : "Start"}
