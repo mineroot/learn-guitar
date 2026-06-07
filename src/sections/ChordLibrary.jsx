@@ -100,11 +100,11 @@ function ChordLibrary() {
             <h2>{chordName(root, type)}</h2>
             <span>{matchingShapes.length ? `${matchingShapes.length} shape${matchingShapes.length === 1 ? "" : "s"}` : "No saved shapes"}</span>
           </div>
-        <div className="chord-grid-list">
-          {matchingShapes.map((chord) => (
+          <div className="chord-grid-list">
+            {matchingShapes.map((chord) => (
               <ChordDiagram chord={chord} key={chord.id} />
-          ))}
-        </div>
+            ))}
+          </div>
         </div>
 
         <aside className="key-panel" aria-label="Chords in key">

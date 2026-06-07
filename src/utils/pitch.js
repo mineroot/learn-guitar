@@ -176,7 +176,3 @@ export function detectPitch(buffer, sampleRate) {
 
   return frequency >= minFrequency && frequency <= maxFrequency ? frequency : null;
 }
-
-export function autoCorrelate(buffer, sampleRate) {
-  return detectPitch(buffer, sampleRate);
-}
