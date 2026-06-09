@@ -1,23 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { PitchDetector } from "pitchy";
-import { guitarStrings } from "../data/music";
+import { noteStrings } from "../data/music";
 import { getAudioContext } from "../utils/audio";
 import { clamp } from "../utils/math";
-import {
-  centsFromClosestString,
-  correctGuitarHarmonic,
-  detectStandardGuitarPitch,
-  findClosestString,
-  frequencyToNote,
-  getSignalLevel,
-} from "../utils/pitch";
+import { frequencyToNote, getSignalLevel } from "../utils/pitch";
 
 const tunerFftSize = 32768;
 const detectionIntervalMs = 110;
 const inputGain = 8;
 const minClarity = 0.5;
 const minSignalLevel = 0.0015;
-const maxStringDistanceCents = 90;
+const minPitchHz = 55;
+const maxPitchHz = 2200;
 
 async function getMicrophoneStream() {
   return navigator.mediaDevices.getUserMedia({ audio: true });
@@ -34,7 +28,6 @@ function Tuner() {
   const recentPitchesRef = useRef([]);
 
   const detected = pitch ? frequencyToNote(pitch) : null;
-  const closestString = pitch ? findClosestString(pitch) : null;
   const needle = detected ? clamp(detected.cents, -50, 50) : 0;
 
   useEffect(() => {
@@ -58,13 +51,12 @@ function Tuner() {
         analyser.fftSize = tunerFftSize;
         analyser.smoothingTimeConstant = 0;
         highpass.type = "highpass";
-        highpass.frequency.value = 55;
+        highpass.frequency.value = minPitchHz;
         lowpass.type = "lowpass";
-        lowpass.frequency.value = 1400;
+        lowpass.frequency.value = maxPitchHz;
         gain.gain.value = inputGain;
 
         const timeBuffer = new Float32Array(analyser.fftSize);
-        const frequencyBuffer = new Float32Array(analyser.frequencyBinCount);
         const detector = PitchDetector.forFloat32Array(timeBuffer.length);
         detector.clarityThreshold = 0.7;
         detector.minVolumeAbsolute = 0.0005;
@@ -74,32 +66,25 @@ function Tuner() {
         highpass.connect(lowpass);
         lowpass.connect(gain);
         gain.connect(analyser);
-        audioRef.current = { context, stream, analyser, timeBuffer, frequencyBuffer };
+        audioRef.current = { context, stream, analyser, timeBuffer };
         setStatus("Listening");
 
         const detect = (time = 0) => {
           if (time - lastDetectionRef.current >= detectionIntervalMs) {
             analyser.getFloatTimeDomainData(timeBuffer);
-            analyser.getFloatFrequencyData(frequencyBuffer);
 
             const signalLevel = getSignalLevel(timeBuffer);
             const [frequency, detectedClarity] = detector.findPitch(timeBuffer, context.sampleRate);
-            const correctedPitchyFrequency = correctGuitarHarmonic(frequency);
-            const pitchyFrequency =
+            const chromaticFrequency =
               detectedClarity >= minClarity &&
               signalLevel >= minSignalLevel &&
-              correctedPitchyFrequency &&
-              centsFromClosestString(correctedPitchyFrequency) <= maxStringDistanceCents
-                ? correctedPitchyFrequency
+              frequency >= minPitchHz &&
+              frequency <= maxPitchHz
+                ? frequency
                 : null;
-            const guitarFrequency =
-              signalLevel >= minSignalLevel
-                ? detectStandardGuitarPitch(frequencyBuffer, context.sampleRate, analyser.fftSize)
-                : null;
-            const corrected = guitarFrequency ?? pitchyFrequency;
 
-            if (corrected) {
-              recentPitchesRef.current = [...recentPitchesRef.current.slice(-4), corrected];
+            if (chromaticFrequency) {
+              recentPitchesRef.current = [...recentPitchesRef.current.slice(-4), chromaticFrequency];
               const sorted = [...recentPitchesRef.current].sort((a, b) => a - b);
               setPitch(sorted[Math.floor(sorted.length / 2)]);
             } else {
@@ -169,11 +154,11 @@ function Tuner() {
         </button>
       </div>
 
-      <aside className="controls string-list" aria-label="Standard tuning reference">
-        {guitarStrings.map((string) => (
-          <div className={closestString?.name === string.name ? "string active" : "string"} key={string.name}>
-            <span>{string.name}</span>
-            <strong>{string.hz.toFixed(2)} Hz</strong>
+      <aside className="controls note-list" aria-label="Chromatic note reference">
+        {noteStrings.map((note) => (
+          <div className={detected?.name === note ? "reference-note active" : "reference-note"} key={note}>
+            <span>{note}</span>
+            <strong>{detected?.name === note ? `${detected.target.toFixed(2)} Hz` : "Chromatic"}</strong>
           </div>
         ))}
       </aside>

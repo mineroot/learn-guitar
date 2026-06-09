@@ -396,11 +396,13 @@ select {
   color: var(--green);
 }
 
-.string-list {
+.string-list,
+.note-list {
   gap: 10px;
 }
 
-.string {
+.string,
+.reference-note {
   display: grid;
   grid-template-columns: 64px 1fr;
   align-items: center;
@@ -411,17 +413,20 @@ select {
   background: var(--soft);
 }
 
-.string span {
+.string span,
+.reference-note span {
   font-size: 1.2rem;
   font-weight: 950;
 }
 
-.string strong {
+.string strong,
+.reference-note strong {
   color: var(--muted);
   text-align: right;
 }
 
-.string.active {
+.string.active,
+.reference-note.active {
   border-color: var(--green);
   background: var(--string-active-bg);
 }
