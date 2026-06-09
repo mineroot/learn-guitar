@@ -39,6 +39,7 @@ describe("pitch utilities", () => {
   it("maps frequency to the nearest chromatic note", () => {
     expect(frequencyToNote(440)).toMatchObject({ name: "A", octave: 4, cents: 0 });
     expect(frequencyToNote(82.41).name).toBe("E");
+    expect(frequencyToNote(466.16).displayName).toBe("A#/Bb");
   });
 
   it("finds the closest standard guitar string", () => {

@@ -396,13 +396,11 @@ select {
   color: var(--green);
 }
 
-.string-list,
-.note-list {
+.string-list {
   gap: 10px;
 }
 
-.string,
-.reference-note {
+.string {
   display: grid;
   grid-template-columns: 64px 1fr;
   align-items: center;
@@ -413,20 +411,17 @@ select {
   background: var(--soft);
 }
 
-.string span,
-.reference-note span {
+.string span {
   font-size: 1.2rem;
   font-weight: 950;
 }
 
-.string strong,
-.reference-note strong {
+.string strong {
   color: var(--muted);
   text-align: right;
 }
 
-.string.active,
-.reference-note.active {
+.string.active {
   border-color: var(--green);
   background: var(--string-active-bg);
 }
@@ -1315,6 +1310,10 @@ select {
 
   .tool-grid {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  }
+
+  .tuner-grid {
+    grid-template-columns: 1fr;
   }
 
   .workspace {

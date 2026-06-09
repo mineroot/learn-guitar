@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { PitchDetector } from "pitchy";
-import { noteStrings } from "../data/music";
 import { getAudioContext } from "../utils/audio";
 import { clamp } from "../utils/math";
 import { frequencyToNote, getSignalLevel } from "../utils/pitch";
@@ -122,10 +121,10 @@ function Tuner() {
   }, [isListening]);
 
   return (
-    <section className="tool-grid" aria-label="Tuner">
+    <section className="tool-grid tuner-grid" aria-label="Tuner">
       <div className="workspace tuner-workspace">
         <div className="tuner-note">
-          <span>{detected ? `${detected.name}${detected.octave}` : "--"}</span>
+          <span>{detected ? `${detected.displayName}${detected.octave}` : "--"}</span>
           <small>
             {pitch
               ? `${pitch.toFixed(1)} Hz · ${Math.round(clarity * 100)}%`
@@ -143,7 +142,7 @@ function Tuner() {
           <span>+50</span>
         </div>
         <p className={Math.abs(needle) <= 5 && detected ? "tuning-state good" : "tuning-state"}>
-          {!detected ? "Play a single string" : Math.abs(needle) <= 5 ? "In tune" : needle < 0 ? "Tune up" : "Tune down"}
+          {!detected ? "Play a note or chord" : Math.abs(needle) <= 5 ? "On pitch" : needle < 0 ? "Flat" : "Sharp"}
         </p>
         <button
           className="primary-action"
@@ -153,15 +152,6 @@ function Tuner() {
           {isListening ? "Stop listening" : "Start tuner"}
         </button>
       </div>
-
-      <aside className="controls note-list" aria-label="Chromatic note reference">
-        {noteStrings.map((note) => (
-          <div className={detected?.name === note ? "reference-note active" : "reference-note"} key={note}>
-            <span>{note}</span>
-            <strong>{detected?.name === note ? `${detected.target.toFixed(2)} Hz` : "Chromatic"}</strong>
-          </div>
-        ))}
-      </aside>
     </section>
   );
 }

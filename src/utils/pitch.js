@@ -1,13 +1,17 @@
 import { guitarStrings, noteStrings } from "../data/music";
 
+const flatNoteStrings = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+
 export function frequencyToNote(frequency) {
   const midi = Math.round(12 * Math.log2(frequency / 440) + 69);
   const name = noteStrings[((midi % 12) + 12) % 12];
+  const flatName = flatNoteStrings[((midi % 12) + 12) % 12];
+  const displayName = name === flatName ? name : `${name}/${flatName}`;
   const octave = Math.floor(midi / 12) - 1;
   const target = 440 * 2 ** ((midi - 69) / 12);
   const cents = Math.round(1200 * Math.log2(frequency / target));
 
-  return { name, octave, cents, target };
+  return { name, flatName, displayName, octave, cents, target };
 }
 
 export function findClosestString(frequency) {
